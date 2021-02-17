@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import numpy as np
-import os, glob, re
+import os, glob, re, librosa
 import pandas as pd
 from util.text import text_to_sequence
 
@@ -28,3 +28,12 @@ for idx, s in enumerate(tqdm(text)):
     text_len.append(len(sentense))
     text_name = 'kss-text-%05d.npy' %idx
     np.save(os.path.join(out_dir, "text", text_name), sentense, allow_pickle=False)
+np.save(os.path.join(out_dir, "text_len.npy"), np.array(text_len))
+print("Text done")
+
+print('Load audio')
+mel_len_list = []
+for idx, fn in enumerate(tqdm(wav_dir)):
+    file_dir = './kss/' + fn
+    wav, _ = librosa.load(file_dir, sr=sample_rate)
+    
