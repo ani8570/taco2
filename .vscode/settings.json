@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\ani85\\anaconda3\\envs\\taco\\python.exe"
+    "terminal.integrated.shellArgs.windows": null,
+    "git.ignoreLimitWarning": true
 }
