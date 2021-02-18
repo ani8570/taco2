@@ -1,4 +1,3 @@
-from typing import Sequence
 from jamo import hangul_to_jamo
 from jamo.jamo import JAMO_LEADS_MODERN, JAMO_TAILS_MODERN, JAMO_VOWELS_MODERN
 

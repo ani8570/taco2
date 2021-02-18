@@ -14,7 +14,7 @@ def main():
         file_data[s] = text[i]
     with open(log_dir+"kss.json", "w", encoding="utf-8") as fp:
         json.dump(file_data, fp, ensure_ascii=False, indent="\t")  
-    
+    fp.close()
 
 if __name__=='__main__':
     main()

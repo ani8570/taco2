@@ -1,19 +1,21 @@
 from librosa.core.spectrum import stft
 from numpy import lib
-from pandas.io import json
 from tqdm import tqdm
 import numpy as np
-import os, glob, re, librosa, argparse
+import os, glob, re, librosa, argparse,json
 import pandas as pd
 from util.text import text_to_sequence
 from util.hparams import *
 
 def make_folder(log_dir, out_dir) :
-    text_dir = glob.glob(os.path.join(log_dir, '*.json'))
-    filter = "([.,!?])"
+    text_dir = log_dir + '/kss.json'
+    
     print(text_dir)
-    with open("C:\\github.com\\ani8570\\taco2\\dataset\\kss\\kss.json", "r", encoding="utf-8") as json_file:
-        print(json_file)
+    a = pd.read_json(text_dir, encoding='UTF-8') 
+    
+    print(a)
+
+
         
     # wav_dir = metadata[0].values
     # text = metadata[3].values
@@ -23,7 +25,6 @@ def make_folder(log_dir, out_dir) :
     os.makedirs(os.path.join(out_dir,"mel"),    exist_ok=True)
     os.makedirs(os.path.join(out_dir,"dec"),    exist_ok=True)
     os.makedirs(os.path.join(out_dir,"spec"),   exist_ok=True)
-    return wav_dir, text
 
 
 
@@ -33,7 +34,7 @@ def make_text(text, out_dir):
     filters = '([.,!?])'
     text_len = []
     for idx, s in enumerate(tqdm(text)):
-        sentense = re.sub(re.compile(filter), '' ,s)
+        sentense = re.sub(re.compile(filters), '' ,s)
         sentense = text_to_sequence(sentense)
         text_len.append(len(sentense))
         text_name = 'kss-text-%05d.npy' %idx
@@ -73,7 +74,8 @@ def make_text(text, out_dir):
 
 def main() :
     parser = argparse.ArgumentParser()
-    parser.add_argument ('--log_dir', default='./dataset\\kss')
+    
+    parser.add_argument ('--log_dir', default='./dataset/kss')
     parser.add_argument ('--out_dir', default='./data')
     config = parser.parse_args()
     log_dir = config.log_dir
