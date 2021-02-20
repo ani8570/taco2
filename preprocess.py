@@ -1,5 +1,6 @@
-from librosa.core.spectrum import stft
+from librosa.feature.spectral import melspectrogram
 from numpy import lib
+from numpy.core.fromnumeric import amin
 from tqdm import tqdm
 import numpy as np
 import os, glob, re, librosa, argparse,json
@@ -58,13 +59,10 @@ def make_wav(wav_dir, out_dir):
     mel_len_list = []
     for idx, fn in enumerate(tqdm(wav_dir)):
         wav, _ = librosa.load(fn, sr=sample_rate)
-        wav, _ = librosa.effects.trim(wav)
-        wav = np.append(wav[0], wav[1:] - preemphasis * wav[:-1])
-        stft = librosa.stft(wav, n_fft=n_fft, hop_length=hop_length, win_length=win_length)
-        stft = np.abs(stft)
-        mel_filter = librosa.filters.mel(sample_rate, n_fft, mel_dim)
-        mel_spec = np.dot(mel_filter, stft)
-        
+        wav, _ = librosa.effects.trim(wav) # 앞뒤 음 제거
+        wav = librosa.effects.preemphasis(wav)
+        stft = np.abs(librosa.stft(wav, n_fft=n_fft, hop_length=hop_length, win_length=win_length))
+        mel_spec = melspectrogram(sr=sample_rate, S=stft,n_fft=n_fft, hop_length=hop_length, win_length=win_length, n_mels=80)
         mel_spec = 20 * np.log10(np.maximum(1e-5, mel_spec))
         stft = 20 * np.log(np.maximum(1e-5, mel_spec))
 
@@ -81,17 +79,19 @@ def make_wav(wav_dir, out_dir):
             mel_spec = np.pad(mel_spec, [[0, reduction - remainder], [0,0]], mode='constant')
             stft = np.pad(stft, [[0, reduction - remainder], [0,0]], mode='constant')
 
+        
         mel_name = 'kss-mel-%05d.npy' %idx
         np.save(os.path.join(out_dir+'/mel',mel_name), mel_spec, allow_pickle=False)
 
         stft_name = 'kss-mel-%05d.npy' %idx
-        np.save(os.path.join(out_dir+'/mel',stft_name), stft, allow_pickle=False)
+        np.save(os.path.join(out_dir+'/spec',stft_name), stft, allow_pickle=False)
 
         # Decoder Input
         mel_spec = mel_spec.reshape((-1, mel_dim * reduction))
         dec_input = np.concatenate((np.zeros_like(mel_spec[:1, :]), mel_spec[:-1, :]), axis=0)
         dec_input = dec_input[:, -mel_dim:]
         dec_name = 'kss-dec-%05d.npy' %idx
+
         np.save(os.path.join(out_dir+'/dec',dec_name), dec_input, allow_pickle=False)
  
     mel_len = sorted(mel_len_list)
@@ -102,10 +102,10 @@ def main() :
     parser = argparse.ArgumentParser()
     
     parser.add_argument ('--log_dir', default='/kss')
-    parser.add_argument ('--out_dir', default='./data')
+    parser.add_argument ('--out_dir', default='/kss')
     config = parser.parse_args()
     log_dir = './dataset' + config.log_dir
-    out_dir = config.out_dir
+    out_dir = './data' + config.out_dir
 
     make_folder(out_dir=out_dir)
     wav_dir, text = load_data(log_dir)
