@@ -21,3 +21,11 @@ def text_to_sequence(text) :
         sequence.append(_symbol_to_id[s])
     sequence.append(_symbol_to_id['~'])
     return sequence
+
+def sequence_to_text(sequence):
+    result = ''
+    for symbol_id in sequence:
+        if symbol_id in _id_to_symbol:
+            s = _id_to_symbol[symbol_id]
+            result += s
+    return result.replace('}{',' ')
