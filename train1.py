@@ -29,6 +29,16 @@ def DataGenerator():
         random.shuffle(idx_list)
         print(1)
 
+        for idx in idx_list:
+            random.shuffle(idx)
+
+            text = [np.load(text_list[mel_len[i][1]]) for i in idx]
+            dec = [np.load(dec_list[mel_len[i][1]]) for i in idx]
+            mel = [np.load(mel_list[mel_len[i][1]]) for i in idx]
+            text_length = [text_len[mel_len[i][1]] for i in idx]
+
+            
+
 
 def main():
     DataGenerator()
