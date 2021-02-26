@@ -1,3 +1,7 @@
+import glob, os, random, traceback
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import numpy as np
+import tensorflow as tf
 from models.tacotron import Tacotron
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.losses import MAE
@@ -5,10 +9,9 @@ from tensorflow.keras.optimizers import Adam
 from util.text import text_to_sequence
 from util.plot_alignmnet import plot_alignment
 from util.hparams import *
-import glob, os, random, traceback
-import numpy as np
-import tensorflow as tf
 
+
+tf.keras.datasets.fashion_mnist
 data_dir = './data/kss'
 text_list = glob.glob(os.path.join(data_dir + '/text', '*.npy'))
 mel_list = glob.glob(os.path.join(data_dir + '/mel', '*.npy'))
@@ -53,12 +56,12 @@ def DataGenerator():
 @tf.function(experimental_relax_shapes=True)
 def train_step(enc_input, dec_input, dec_target, text_length):
     with tf.GradientTape() as tape:
-        pred, aligment = model(enc_input, text_length, dec_input, is_training=True)
+        pred, alignment = model(enc_input, text_length, dec_input, is_training=True)
         loss = tf.reduce_mean(MAE(dec_target, pred))
     variables = model.trainable_variables
     gradients = tape.gradient(loss, variables)
     optimizer.apply_gradients(zip(gradients, variables))
-    return loss, pred[0], aligment[0]
+    return loss, pred[0], alignment[0]
 
 dataset = tf.data.Dataset.from_generator(generator=DataGenerator, 
                                          output_types=(tf.float32, tf.float32, tf.float32, tf.int32),
